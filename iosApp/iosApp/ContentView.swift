@@ -2,41 +2,54 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    @State private var showContent = false
+    @ObservedObject var viewModel: ViewModel
+
     var body: some View {
-        VStack {
-             Text("My  app app app app app app app app м app app end")
-                .toolbar {
-                    ToolbarItem {
-                        Image(systemName: "person.crop.circle")
+        List(viewModel.users, id: \.self) { user in
+
+            //unwrapping
+            if let name = user.name {
+                VStack {
+                    Spacer()
+                    HStack {
+                        AsyncImage(url: URL(string: user.picture!.thumbnail!))
+                            .frame(width: 50, height: 50)
+                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
+                        VStack(alignment: .leading, content: {
+                            Text("\(name.first ?? "Firstname") \(name.last ?? "Lastname")")
+                            Text(user.phone ?? "Phone") //Coalesce using '??' to provide a default when the optional value contains 'nil'
+                        })
                     }
-                }
-//                .navigationBarTitleDisplayMode(.inline)
-//                .toolbarBackground(.red, for: .navigationBar)
-//                 .toolbarBackground(.visible, for: .navigationBar)
-            Button("Click me!") {
-                withAnimation {
-                    showContent = !showContent
+                    Spacer()
                 }
             }
+        }.onAppear{
+            self.viewModel.observeDataFlow()
+        }
+    }
+}
 
-            if showContent {
-                VStack(spacing: 16) {
-                    Image(systemName: "swift")
-                        .font(.system(size: 200))
-                        .foregroundColor(.accentColor)
-                    Text("SwiftUI: \(Greeting().greet())")
+extension ContentView {
+
+    @MainActor
+    class ViewModel : ObservableObject {
+        var homeRepository: HomeRepository = HomeRepository.init()
+
+        @Published var users: [Results] = []
+
+        func observeDataFlow() {
+
+            Task{
+                for await user in homeRepository.getUsers() {
+                    self.users.append(contentsOf: user)
                 }
-                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding()
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView()
+//    }
+//}
