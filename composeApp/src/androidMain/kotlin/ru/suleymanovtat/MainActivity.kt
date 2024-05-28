@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -19,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val users = homeViewModel.users.collectAsStateWithLifecycle()
-            HomeScreen(users)
+            HomeScreen(users.value)
         }
     }
 }

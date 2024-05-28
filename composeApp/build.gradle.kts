@@ -28,6 +28,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
 
             implementation(libs.coil)
+            implementation(libs.coil.compose)
 
         }
         commonMain.dependencies {
